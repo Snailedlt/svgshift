@@ -264,19 +264,31 @@ main(int    argc,
         ++argv;
     }
 
-    if (*argv == NULL)
-        print_usage_and_exit(usage_str);
+    if (*argv == NULL) {
+        // If no file is specified, use stdin
+        file = stdin;
+    } else {
+        file = fopen(*argv, "r");
+        if (file == NULL) {
+            fprintf(stderr, "Could not open file %s\n", *argv);
+            exit(1);
+        }
+    }
 
-    file = fopen(*argv, "r");
-
-    if (file == NULL) {
-        printf("Could not open file %s\n", *argv);
+    if (!manipulate(file, operation_function)) {
+        fprintf(stderr, "Error manipulating colors\n");
+        if (file != stdin) {
+            fclose(file);
+        }
         exit(1);
     }
 
-    manipulate(file, operation_function);
+    if (file != stdin) {
+        fclose(file);
+    }
     #else
     debug_function();
     #endif
+
     return 0;
 }
